@@ -13,16 +13,18 @@ Come si procede
 ---------------
 1) si scarica il presente pacchetto e si decomprime
 2) si carica via FTP il file install.php in una cartella della root del sito dedicato
-   al service provider. Si consiglia di creare una cartella di nome "spidinst" e cari-
-   care lì il file. Il sito deve essere sicuro (HTTPS).
+   al service provider. Si consiglia di creare una cartella di nome "spidinst" e caricare
+   lì il file. Il sito deve essere sicuro (HTTPS).
 3) ammettendo che il dominio del sito sia www.miodominio.it , si lancia così lo script:
    https://www.miodominio.it/spidinst/install.php
 4) si procede seguendo con cura le indicazioni a video
 5) completata la procedura si cancella via FTP il file install.php e si accede alla
    interfaccia della libreria
    https://www.miodominio.it/spid
-6) verificato il buon funzionamento del pacchetto installato, proseguire con le indicazioni
-   ricavabili dal sito di Agid relative ai service provider.
+6) verificato il buon funzionamento del pacchetto installato, seguire le indicazioni
+   presenti nel tutorial per procedure tecniche e amministrative da espletare sul sito
+   www.spid.gov.it .
+   
    
 Dettagli tecnici
 ----------------
