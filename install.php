@@ -6,7 +6,7 @@
 </head>
 <body>
 <?php
-define('VERSION', '0.1alpha');
+define('VERSION', '0.2alpha');
 define('REPO', 'http://www.scuolacooperativa.net/drupal7/sites/default/files/simplespidphp.zip');
 if (extension_loaded ('zip') == false) {
 	echo 'estensione ZIP di PHP non presente, impossibile continuare';
@@ -21,6 +21,12 @@ if (extension_loaded ('openssl') == false) {
 	exit;
 }
 
+if (file_exists("simplespidphp/cert/saml.crt")
+  || file_exists("../simplespidphp/cert/saml.crt")) {
+	echo "Il framework sembra già installato, operazione interrotta.";
+	exit;
+}
+
 $query = $_SERVER['QUERY_STRING'];
 $root = $_SERVER['DOCUMENT_ROOT'];
 chdir($root);
@@ -30,27 +36,30 @@ if (is_writable('..')) {
 	$is_out = true;
 }
 
-if (file_exists("simplespidphp/cert/saml.crt")) {
-	echo "Il framework sembra già installato, operazione interrotta.";
-	exit;
-}
-
 switch ($query) {
 	case null:
 	case 'start':
-		//echo 'start';
 		echo start_download();
 		break;
+	case 'download_root':
+    chdir($root);
+    $is_out = false;
 	case 'download':
 		echo download();
 		unzip($is_out? false:true);
 		@unlink('simplespidphp.zip');
 		make_link();
 		break;
+	case 'install_root':
+    chdir($root);
+    $is_out = false;
 	case 'install':
-		echo cert_form();
+		echo cert_form($is_out);
 		break;
-	case configure:
+	case 'configure_root':
+    chdir($root);
+    $is_out = false;
+	case 'configure':
 		$dn = array(
 			"countryName" => $_POST['countryName'], 
 			"stateOrProvinceName" => $_POST['stateOrProvinceName'], 
@@ -100,17 +109,22 @@ function do_ajax() {
   document.getElementById("download").setAttribute("disabled", "disabled");
   document.getElementById("download").setAttribute("style", "cursor:wait");
   var div = document.getElementById("msg");
+  var root = document.getElementById("root");
   div.innerHTML = 'attendere, sto scaricando...';
   var http_request = createXMLHttpRequest();
   if (!http_request) {
     alert('Javascript error: no XMLHTTP instance');
     return false;
   }
-  http_request.open('GET', '$url');
+  var url = '$url';
+  var link = '$link';
+  if (root.checked) url += '_root';
+  http_request.open('GET', url);
   http_request.onload = function() {
     document.getElementById("download").setAttribute("style", "cursor:default;display:none;");
     if (http_request.status === 200) {
-		div.innerHTML = 'file scaricato: $link';
+    if (root.checked) link = link.replace('?install','?install_root');
+		div.innerHTML = 'file scaricato: '+link;
     }
     else {
         alert('Request failed.  Returned status of ' + xhr.status);
@@ -122,7 +136,7 @@ function do_ajax() {
 </script>	
 MYSCRIPT;
 echo $myscript;
-echo '<div style="text-align:center"><input id="download" style="font-size:1.2em" type="button" value="scarica simplespidphp" onclick="do_ajax()" /></div>';
+echo '<div style="text-align:center"><label for="root">Scarica in root</label><input id="root" type="checkbox"><br/><input id="download" style="font-size:1.2em" type="button" value="scarica simplespidphp" onclick="do_ajax()" /></div>';
 }
 function unzip($aruba) {
 $zip = new ZipArchive;
@@ -176,8 +190,9 @@ function download() {
   } 
   else return "FAIL: curl_init()"; 
 }
-function cert_form() {
+function cert_form($is_out) {
 $commonName = $_SERVER['SERVER_NAME'];
+$action = $is_out === false ? '?configure_root' : '?configure';
 $myform = <<<MYFORM
 <script>
 function validator() {
@@ -198,7 +213,7 @@ return true;
 </script>
 	GENERATORE DI CERTIFICATO E ALTRI DATI PER SPID<br/>
     COMPILARE CORRETTAMENTE *TUTTI* I CAMPI<br/>
-	<form id="get_data" action="?configure" method="POST" onSubmit="return validator()">
+	<form id="get_data" action="$action" method="POST" onSubmit="return validator()">
 		-------- certificato ---------<br/>
 		<input name="countryName" type="text" value="IT" readonly /> countryName<br/>
 		<select name="stateOrProvinceName"><option>Agrigento</option><option>Alessandria</option><option>Ancona</option><option>Aosta</option><option>Arezzo</option><option>Ascoli Piceno</option><option>Asti</option><option>Avellino</option><option>Bari</option><option>Barletta-Andria-Trani</option><option>Belluno</option><option>Benevento</option><option>Bergamo</option><option>Biella</option><option>Bologna</option><option>Bolzano</option><option>Brescia</option><option>Brindisi</option><option>Cagliari</option><option>Caltanissetta</option><option>Campobasso</option><option>Carbonia-Iglesias</option><option>Caserta</option><option>Catania</option><option>Catanzaro</option><option>Chieti</option><option>Como</option><option>Cosenza</option><option>Cremona</option><option>Crotone</option><option>Cuneo</option><option>Enna</option><option>Fermo</option><option>Ferrara</option><option>Firenze</option><option>Foggia</option><option>Forlì-Cesena</option><option>Frosinone</option><option>Genova</option><option>Gorizia</option><option>Grosseto</option><option>Imperia</option><option>Isernia</option><option>La Spezia</option><option>L&#039;Aquila</option><option>Latina</option><option>Lecce</option><option>Lecco</option><option>Livorno</option><option>Lodi</option><option>Lucca</option><option>Macerata</option><option>Mantova</option><option>Massa-Carrara</option><option>Matera</option><option>Messina</option><option>Milano</option><option>Modena</option><option>Monza e della Brianza</option><option>Napoli</option><option>Novara</option><option>Nuoro</option><option>Olbia-Tempio</option><option>Oristano</option><option>Padova</option><option>Palermo</option><option>Parma</option><option>Pavia</option><option>Perugia</option><option>Pesaro e Urbino</option><option>Pescara</option><option>Piacenza</option><option>Pisa</option><option>Pistoia</option><option>Pordenone</option><option>Potenza</option><option>Prato</option><option>Ragusa</option><option>Ravenna</option><option>Reggio Calabria</option><option>Reggio Emilia</option><option>Rieti</option><option>Rimini</option><option>Roma</option><option>Rovigo</option><option>Salerno</option><option>Medio Campidano</option><option>Sassari</option><option>Savona</option><option>Siena</option><option>Siracusa</option><option>Sondrio</option><option>Taranto</option><option>Teramo</option><option>Terni</option><option>Torino</option><option>Ogliastra</option><option>Trapani</option><option>Trento</option><option>Treviso</option><option>Trieste</option><option>Udine</option><option>Varese</option><option>Venezia</option><option>Verbano-Cusio-Ossola</option><option>Vercelli</option><option>Verona</option><option>Vibo Valentia</option><option>Vicenza</option><option>Viterbo</option></select> stateOrProvinceName<br/>

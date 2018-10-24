@@ -1,8 +1,8 @@
 SPIDINST
 --------
 Author: P. Bozzo
-Version: 0.1 alpha
-Date: 2017/10/30
+Version: 0.2 alpha
+Date: 2018/10/24
 License: GPL 2.1
 
 Installatore del pacchetto simplespidphp-pasw, per avere una libreria derivata da
@@ -33,5 +33,4 @@ Dettagli tecnici
 - Per ora lo script funziona correttamente solo su siti che utilizzano sistemi UNIX/LINUX
 - L'installazione per ora prevede una unica fonte di autenticazione, generata automaticamente
   e denominata "default-sp"
-- La versione di PHP da utilizzare deve essere da 5.4 a 5.6.x
 
